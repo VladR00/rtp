@@ -25,7 +25,7 @@ func random(min float64, max float64) float64 {
 	return math.Round(rng*10) / 10
 }
 
-func generateMultiplier(sum float64, count int, allcount int, rtp float64, check *bool, seq float64) float64 {
+func generateMultiplier(sum float64, count int, allcount int, rtp float64, seq float64) float64 {
 	sumFinal := rtp * float64(allcount)
 	iterationforend := float64(allcount) - float64(count)
 	sumNeed := sumFinal - sum //+ iterationforend
@@ -50,10 +50,8 @@ func (storage *Storage) Calculation(count int) float64 {
 	sequence := make([]float64, count)
 	multiplier := make([]float64, count)
 	var sum, allsum float64
-	var firstcheck bool = true
 	chAllSum := make(chan float64, count)
 	wg := &sync.WaitGroup{}
-	var mu sync.Mutex
 	fmt.Println("start for")
 
 	for i := 0; i < count; i++ {
@@ -76,19 +74,11 @@ func (storage *Storage) Calculation(count int) float64 {
 	fmt.Println("Sequense len: ", len(sequence))
 
 	for i := 0; i < count; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			multiplier[i] = generateMultiplier(sum, i, count, storage.RTP, &firstcheck, sequence[i])
-			if multiplier[i] > sequence[i] {
-				mu.Lock()
-				defer mu.Unlock()
-				sum += sequence[i]
-			}
-		}()
+		multiplier[i] = generateMultiplier(sum, i, count, storage.RTP, sequence[i])
+		if multiplier[i] > sequence[i] {
+			sum += sequence[i]
+		}
 	}
-	wg.Wait()
-
 	fmt.Println("multiplier len: ", len(multiplier))
 
 	rtp := sum / float64(count)
