@@ -28,12 +28,13 @@ func random(min float64, max float64) float64 {
 func generateMultiplier(sum float64, count int, allcount int, rtp float64, check *bool, seq float64) float64 {
 	sumFinal := rtp * float64(allcount)
 	iterationforend := float64(allcount) - float64(count)
-	sumNeed := sumFinal - sum + iterationforend
+	sumNeed := sumFinal - sum //+ iterationforend
 	fmt.Println("Iteration for end: ", iterationforend)
 	fmt.Println("Sum need: ", sumNeed)
 	fmt.Println("Current sum: ", sum)
+	fmt.Println("Sequence: ", seq)
 
-	if sum <= sumNeed {
+	if sum <= sumFinal {
 		if seq <= sumNeed {
 			return random(seq-1, 10000)
 		} else {
