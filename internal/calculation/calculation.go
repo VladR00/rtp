@@ -53,7 +53,7 @@ func (storage *Storage) Calculation(count int) float64 {
 	var firstcheck bool = true
 	chAllSum := make(chan float64, count)
 	wg := &sync.WaitGroup{}
-	// var mu sync.Mutex
+	var mu sync.Mutex
 	fmt.Println("start for")
 
 	for i := 0; i < count; i++ {
@@ -76,18 +76,18 @@ func (storage *Storage) Calculation(count int) float64 {
 	fmt.Println("Sequense len: ", len(sequence))
 
 	for i := 0; i < count; i++ {
-		// wg.Add(1)
-		// go func() {
-		// defer wg.Done()
-		multiplier[i] = generateMultiplier(sum, i, count, storage.RTP, &firstcheck, sequence[i])
-		if multiplier[i] > sequence[i] {
-			// mu.Lock()
-			// defer mu.Unlock()
-			sum += sequence[i]
-		}
-		// }()
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			multiplier[i] = generateMultiplier(sum, i, count, storage.RTP, &firstcheck, sequence[i])
+			if multiplier[i] > sequence[i] {
+				mu.Lock()
+				defer mu.Unlock()
+				sum += sequence[i]
+			}
+		}()
 	}
-	// wg.Wait()
+	wg.Wait()
 
 	fmt.Println("multiplier len: ", len(multiplier))
 
